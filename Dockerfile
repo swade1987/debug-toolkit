@@ -2,7 +2,7 @@
 # both the stable and edge/community repos), so it's built from source here.
 # The builder stage carries the compiler toolchain; the final stage doesn't.
 
-FROM alpine:3.23.3@sha256:25109184c71bdad752c8312a8623239686a9a2071e8825f20acb8f2198c3f659 AS builder
+FROM alpine:3.24.1@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b AS builder
 
 RUN apk add --no-cache \
     build-base \
@@ -37,7 +37,7 @@ RUN sed -i \
 RUN cmake -DUSE_SSL=ON -DUSE_GETTEXT=ON -B build . && \
     cmake --build build
 
-FROM alpine:3.23.3@sha256:25109184c71bdad752c8312a8623239686a9a2071e8825f20acb8f2198c3f659
+FROM alpine:3.24.1@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b
 LABEL MAINTAINER="Steven Wade <steven@stevenwade.co.uk>"
 
 # libintl: httping links against libintl.so.8 at runtime (see the builder
