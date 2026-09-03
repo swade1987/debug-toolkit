@@ -1,5 +1,6 @@
 # debug-toolkit
 
+[![release](https://github.com/swade1987/debug-toolkit/actions/workflows/release.yml/badge.svg)](https://github.com/swade1987/debug-toolkit/actions/workflows/release.yml)
 [![image](https://github.com/swade1987/debug-toolkit/actions/workflows/image.yml/badge.svg)](https://github.com/swade1987/debug-toolkit/actions/workflows/image.yml)
 [![commit-lint](https://github.com/swade1987/debug-toolkit/actions/workflows/commit-lint.yaml/badge.svg)](https://github.com/swade1987/debug-toolkit/actions/workflows/commit-lint.yaml)
 [![pr-lint](https://github.com/swade1987/debug-toolkit/actions/workflows/pr-lint.yml/badge.svg)](https://github.com/swade1987/debug-toolkit/actions/workflows/pr-lint.yml)
