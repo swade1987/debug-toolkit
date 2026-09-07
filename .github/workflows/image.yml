@@ -13,6 +13,11 @@ on:
     # rebuild is the freshness mechanism here, not a version-bump PR bot).
     - cron: '0 3 * * 1'
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag to push alongside latest (e.g. 1.0.0). Only needed for a manual re-run/backfill against an already-released tag - a real tag push derives this automatically.'
+        required: false
+        type: string
 
 concurrency:
   group: image-${{ github.ref }}
@@ -42,11 +47,16 @@ jobs:
 
       - name: Determine image tags
         id: tags
+        env:
+          VERSION_INPUT: ${{ inputs.version }}
         run: |
           TAGS="eu.gcr.io/swade1987/debug-toolkit:latest"
-          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+          VERSION="${VERSION_INPUT}"
+          if [[ -z "${VERSION}" && "${GITHUB_REF}" == refs/tags/* ]]; then
             VERSION=${GITHUB_REF#refs/tags/v}
             VERSION=${VERSION#refs/tags/}
+          fi
+          if [[ -n "${VERSION}" ]]; then
             TAGS="${TAGS}"$'\n'"eu.gcr.io/swade1987/debug-toolkit:${VERSION}"
           fi
           {
