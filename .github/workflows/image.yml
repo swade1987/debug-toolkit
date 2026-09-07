@@ -40,13 +40,28 @@ jobs:
           username: _json_key
           password: ${{ secrets.PUBLIC_GCR_JSON_KEY }}
 
+      - name: Determine image tags
+        id: tags
+        run: |
+          TAGS="eu.gcr.io/swade1987/debug-toolkit:latest"
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/v}
+            VERSION=${VERSION#refs/tags/}
+            TAGS="${TAGS}"$'\n'"eu.gcr.io/swade1987/debug-toolkit:${VERSION}"
+          fi
+          {
+            echo "tags<<TAGS_EOF"
+            echo "$TAGS"
+            echo "TAGS_EOF"
+          } >> "$GITHUB_OUTPUT"
+
       - name: Build and push
         id: push
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: .
           push: true
-          tags: eu.gcr.io/swade1987/debug-toolkit:latest
+          tags: ${{ steps.tags.outputs.tags }}
 
       # Signed SLSA build provenance, verifiable with "gh attestation verify".
       # push-to-registry is left off: GCR's OCI-referrer support for a
