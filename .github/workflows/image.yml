@@ -48,15 +48,8 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
 
-      - name: Login to GCR
-        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
-        with:
-          registry: eu.gcr.io
-          username: _json_key
-          password: ${{ secrets.PUBLIC_GCR_JSON_KEY }}
-
-      # ghcr.io is the canonical registry; eu.gcr.io is kept only while
-      # consumers migrate, because Google bills Steve for every public pull.
+      # ghcr.io is the only registry. eu.gcr.io was retired on 2026-12-07
+      # because Google billed every anonymous public pull as internet egress.
       - name: Login to GHCR
         uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
         with:
@@ -69,14 +62,14 @@ jobs:
         env:
           VERSION_INPUT: ${{ inputs.version }}
         run: |
-          TAGS="ghcr.io/swade1987/debug-toolkit:latest"$'\n'"eu.gcr.io/swade1987/debug-toolkit:latest"
+          TAGS="ghcr.io/swade1987/debug-toolkit:latest"
           VERSION="${VERSION_INPUT}"
           if [[ -z "${VERSION}" && "${GITHUB_REF}" == refs/tags/* ]]; then
             VERSION=${GITHUB_REF#refs/tags/v}
             VERSION=${VERSION#refs/tags/}
           fi
           if [[ -n "${VERSION}" ]]; then
-            TAGS="${TAGS}"$'\n'"ghcr.io/swade1987/debug-toolkit:${VERSION}"$'\n'"eu.gcr.io/swade1987/debug-toolkit:${VERSION}"
+            TAGS="${TAGS}"$'\n'"ghcr.io/swade1987/debug-toolkit:${VERSION}"
           fi
           {
             echo "tags<<TAGS_EOF"
@@ -95,8 +88,7 @@ jobs:
 
       # Signed SLSA build provenance, verifiable with "gh attestation verify".
       # push-to-registry is left off: the attestation is already verifiable
-      # via GitHub's own attestation store, which matches on the digest, and
-      # both registries hold the same digest.
+      # via GitHub's own attestation store, which matches on the digest.
       - name: Attest build provenance
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:

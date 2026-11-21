@@ -15,7 +15,7 @@ A minimal, non-root, read-only-rootfs-friendly container for debugging HTTP and 
 
 ## Usage
 
-The image is published to [GitHub Container Registry](https://github.com/swade1987/debug-toolkit/pkgs/container/debug-toolkit) as `ghcr.io/swade1987/debug-toolkit`. `eu.gcr.io/swade1987/debug-toolkit` is deprecated. It still receives new releases for now, but it will stop, so switch to `ghcr.io`. Older tags are copied to `ghcr.io` with their original digests (the `mirror-to-ghcr` workflow), so switching is a hostname change, not a version change.
+The image is published to [GitHub Container Registry](https://github.com/swade1987/debug-toolkit/pkgs/container/debug-toolkit) as `ghcr.io/swade1987/debug-toolkit`. `eu.gcr.io/swade1987/debug-toolkit` was retired on 7 December 2026. Every tag that was published there is on `ghcr.io` with the same digest, so switching is a hostname change, not a version change.
 
 Ephemeral, thrown away when you're done - this image isn't meant to be deployed as a long-running pod:
 
