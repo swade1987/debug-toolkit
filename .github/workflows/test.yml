@@ -21,4 +21,4 @@ jobs:
         with:
           context: .
           push: false
-          tags: eu.gcr.io/swade1987/debug-toolkit:ci
+          tags: ghcr.io/swade1987/debug-toolkit:ci

@@ -15,16 +15,18 @@ A minimal, non-root, read-only-rootfs-friendly container for debugging HTTP and 
 
 ## Usage
 
+The image is published to [GitHub Container Registry](https://github.com/swade1987/debug-toolkit/pkgs/container/debug-toolkit) as `ghcr.io/swade1987/debug-toolkit`. `eu.gcr.io/swade1987/debug-toolkit` is deprecated. It still receives new releases for now, but it will stop, so switch to `ghcr.io`. Older tags are copied to `ghcr.io` with their original digests (the `mirror-to-ghcr` workflow), so switching is a hostname change, not a version change.
+
 Ephemeral, thrown away when you're done - this image isn't meant to be deployed as a long-running pod:
 
 ```bash
-kubectl run debug --rm -it --image=eu.gcr.io/swade1987/debug-toolkit -- bash
+kubectl run debug --rm -it --image=ghcr.io/swade1987/debug-toolkit -- bash
 ```
 
 To debug an *existing* pod's network namespace directly, attach an ephemeral debug container to it instead:
 
 ```bash
-kubectl debug -it <pod-name> --image=eu.gcr.io/swade1987/debug-toolkit --target=<container-name> -- bash
+kubectl debug -it <pod-name> --image=ghcr.io/swade1987/debug-toolkit --target=<container-name> -- bash
 ```
 
 ### Read-only root filesystem
@@ -74,7 +76,7 @@ Alpine doesn't package `httping` at all (checked both the stable and edge/commun
 Every image push gets a signed build provenance attestation and an attested SBOM (GitHub's own Sigstore-backed [artifact attestations](https://docs.github.com/en/actions/security-guides/using-artifact-attestations-to-establish-provenance-for-builds)), verifiable with:
 
 ```bash
-gh attestation verify oci://eu.gcr.io/swade1987/debug-toolkit:latest --owner swade1987
+gh attestation verify oci://ghcr.io/swade1987/debug-toolkit:latest --owner swade1987
 ```
 
 The image is rebuilt weekly (in addition to every push to `main`) to pick up current Alpine package versions even when the Dockerfile itself hasn't changed - Dependabot separately tracks the base image's own digest. The repo runs an [OpenSSF Scorecard](https://scorecard.dev/) check on every push (badge above). See [SECURITY.md](SECURITY.md) to report a vulnerability.
