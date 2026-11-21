@@ -34,6 +34,7 @@ jobs:
       id-token: write
       attestations: write
       artifact-metadata: write
+      packages: write # to push to ghcr.io with GITHUB_TOKEN
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -45,19 +46,28 @@ jobs:
           username: _json_key
           password: ${{ secrets.PUBLIC_GCR_JSON_KEY }}
 
+      # ghcr.io is the canonical registry; eu.gcr.io is kept only while
+      # consumers migrate, because Google bills Steve for every public pull.
+      - name: Login to GHCR
+        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Determine image tags
         id: tags
         env:
           VERSION_INPUT: ${{ inputs.version }}
         run: |
-          TAGS="eu.gcr.io/swade1987/debug-toolkit:latest"
+          TAGS="ghcr.io/swade1987/debug-toolkit:latest"$'\n'"eu.gcr.io/swade1987/debug-toolkit:latest"
           VERSION="${VERSION_INPUT}"
           if [[ -z "${VERSION}" && "${GITHUB_REF}" == refs/tags/* ]]; then
             VERSION=${GITHUB_REF#refs/tags/v}
             VERSION=${VERSION#refs/tags/}
           fi
           if [[ -n "${VERSION}" ]]; then
-            TAGS="${TAGS}"$'\n'"eu.gcr.io/swade1987/debug-toolkit:${VERSION}"
+            TAGS="${TAGS}"$'\n'"ghcr.io/swade1987/debug-toolkit:${VERSION}"$'\n'"eu.gcr.io/swade1987/debug-toolkit:${VERSION}"
           fi
           {
             echo "tags<<TAGS_EOF"
@@ -74,13 +84,13 @@ jobs:
           tags: ${{ steps.tags.outputs.tags }}
 
       # Signed SLSA build provenance, verifiable with "gh attestation verify".
-      # push-to-registry is left off: GCR's OCI-referrer support for a
-      # Sigstore-format attestation isn't confirmed, and the attestation is
-      # already verifiable via GitHub's own attestation store either way.
+      # push-to-registry is left off: the attestation is already verifiable
+      # via GitHub's own attestation store, which matches on the digest, and
+      # both registries hold the same digest.
       - name: Attest build provenance
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
-          subject-name: eu.gcr.io/swade1987/debug-toolkit
+          subject-name: ghcr.io/swade1987/debug-toolkit
           subject-digest: ${{ steps.push.outputs.digest }}
 
       # SPDX SBOM for the exact image just pushed (pinned to its digest, not
@@ -88,7 +98,7 @@ jobs:
       - name: Generate SBOM
         uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
         with:
-          image: eu.gcr.io/swade1987/debug-toolkit@${{ steps.push.outputs.digest }}
+          image: ghcr.io/swade1987/debug-toolkit@${{ steps.push.outputs.digest }}
           format: spdx-json
           output-file: sbom.spdx.json
           upload-artifact: false
@@ -97,6 +107,6 @@ jobs:
       - name: Attest SBOM
         uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4.2.2
         with:
-          subject-name: eu.gcr.io/swade1987/debug-toolkit
+          subject-name: ghcr.io/swade1987/debug-toolkit
           subject-digest: ${{ steps.push.outputs.digest }}
           sbom-path: sbom.spdx.json
